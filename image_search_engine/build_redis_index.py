@@ -1,6 +1,6 @@
 # import packages
 from __future__ import print_function
-from image_search_pipeline.db import RedisQueue
+from image_search_pipeline.database import RedisQueue
 from redis import Redis
 import argparse
 import h5py

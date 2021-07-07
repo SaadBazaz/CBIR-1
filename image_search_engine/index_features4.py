@@ -1,5 +1,9 @@
 # import packages
 from __future__ import print_function
+
+import copy
+import numpy as np
+
 from image_search_pipeline.descriptors import DetectAndDescribe
 from image_search_pipeline.indexer import FeatureIndexer
 from imutils.feature import FeatureDetector_create, DescriptorExtractor_create
@@ -30,9 +34,20 @@ descriptor = cv2.ORB_create(nfeatures=1500)
 
 dad = DetectAndDescribe(detector, descriptor)
 
-# initialize the feature indexer
-fi = FeatureIndexer(args["features_db"], estNumImages = args["approx_images"],
-    maxBufferSize = args["max_buffer_size"], verbose = True)
+
+
+database_loc = args["features_db"]
+database_loc = database_loc.split("/")
+database_loc[-1]=database_loc[-1]
+
+
+fis = []
+for i in range (4):
+    db_loc = copy.deepcopy(database_loc)
+    db_loc[-1]=str(i) + "_" + db_loc[-1]
+    # initialize the feature indexer
+    fis.append(FeatureIndexer('/'.join(db_loc), estNumImages = args["approx_images"],
+        maxBufferSize = args["max_buffer_size"], verbose = True))
 
 # loop over the images in the dataset
 for (i, imagePath) in enumerate(paths.list_images(args["dataset"])):
@@ -47,15 +62,33 @@ for (i, imagePath) in enumerate(paths.list_images(args["dataset"])):
     image = imutils.resize(image, width = 320)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # describe the image
-    (kps, descs) = dad.describe(image)
+    B = [M for SubRow in np.split(image,2, axis = 0) for M in np.split(SubRow,2, axis = 1)]
 
-    # if either the keypoints or descriptors are None, then ignore the image
-    if kps is None or descs is None:
-        continue
+    C1,C2,C3,C4 = B
 
-    # index the features
-    fi.add(filename, kps, descs)
+    Q1 = C1
+    Q2 = np.concatenate( (C1, C2) )
+    Q3 = np.concatenate( (C2, C4) )
+    Q4 = image
 
-# finish the indexing process
-fi.finish()
+    quads = [
+        Q1, 
+        Q2, 
+        Q4, 
+        Q3
+    ]
+
+    for i, (q, fi) in enumerate(zip(quads, fis)):
+        # describe the image
+        (kps, descs) = dad.describe(q)
+
+        # if either the keypoints or descriptors are None, then ignore the image
+        if kps is None or descs is None:
+            continue
+
+        # index the features
+        fi.add(filename, kps, descs)
+
+for fi in fis:
+    # finish the indexing process
+    fi.finish()

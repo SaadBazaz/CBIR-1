@@ -33,6 +33,7 @@ pbar = progressbar.ProgressBar(maxval = featuresDB["image_ids"].shape[0], widget
 
 # loop over the image IDs
 for (i, imageID) in enumerate(featuresDB["image_ids"]):
+    # print ("Image ID is:", imageID)
     # grab the rows for the features database and split them into
     # keypointsand feature vectors
     (start, end) = featuresDB["index"][i]
@@ -71,18 +72,18 @@ print("[INFO] writing viosualizations to file...")
 # loop over the top results
 for (vwID, results) in vis.items():
     # initialize the results montage
-    montage = ResultsMontage((64, 64), 4, 16)
+    montage = ResultsMontage((8, 8), 4, 16)
 
     # loop over the results
     for (_, (x, y), imageID) in results:
-        # load the current image
+         # load the current image
         p = "{}/{}".format(args["dataset"], imageID)
         image = cv2.imread(p)
         (h, w) = image.shape[:2]
 
-        # extract a 64 x 64 region surrounding the keypoint
-        (startX, endX) = (max(0, int(x) - 32), min(w, int(x) + 32))
-        (startY, endY) = (max(0, int(y) - 32), min(h, int(y) + 32))
+        # extract a 8 x 8 region surrounding the keypoint
+        (startX, endX) = (max(0, int(x) - 4), min(w, int(x) + 4))
+        (startY, endY) = (max(0, int(y) - 4), min(h, int(y) + 4))
         roi = image[startY:endY, startX:endX]
 
         # add the ROI to the montage
