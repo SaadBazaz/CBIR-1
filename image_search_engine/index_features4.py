@@ -36,17 +36,19 @@ dad = DetectAndDescribe(detector, descriptor)
 
 
 
-database_loc = args["features_db"]
-database_loc = database_loc.split("/")
-database_loc[-1]=database_loc[-1]
+# database_loc = args["features_db"]
+# database_loc = database_loc.split("/")
+# database_loc[-1]=database_loc[-1]
+
+database_loc = args["features_db"].split(",")
 
 
 fis = []
-for i in range (4):
-    db_loc = copy.deepcopy(database_loc)
-    db_loc[-1]=str(i) + "_" + db_loc[-1]
+for db in database_loc:
+    # db_loc = copy.deepcopy(database_loc)
+    # db_loc[-1]=str(i) + "_" + db_loc[-1]
     # initialize the feature indexer
-    fis.append(FeatureIndexer('/'.join(db_loc), estNumImages = args["approx_images"],
+    fis.append(FeatureIndexer(db, estNumImages = args["approx_images"],
         maxBufferSize = args["max_buffer_size"], verbose = True))
 
 # loop over the images in the dataset
@@ -66,16 +68,16 @@ for (i, imagePath) in enumerate(paths.list_images(args["dataset"])):
 
     C1,C2,C3,C4 = B
 
-    Q1 = C1
-    Q2 = np.concatenate( (C1, C2) )
-    Q3 = np.concatenate( (C2, C4) )
-    Q4 = image
+    # Q1 = C1
+    # Q2 = np.concatenate( (C1, C2) )
+    # Q3 = np.concatenate( (C2, C4) )
+    # Q4 = image
 
     quads = [
-        Q1, 
-        Q2, 
-        Q4, 
-        Q3
+        C1, 
+        C3, 
+        C4, 
+        C2
     ]
 
     for i, (q, fi) in enumerate(zip(quads, fis)):

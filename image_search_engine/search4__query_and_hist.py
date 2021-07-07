@@ -33,9 +33,9 @@ args = vars(ap.parse_args())
 # distance metric, and inverted document frequency array
 
 # detector = FeatureDetector_create("SURF")
-detector = cv2.ORB_create(nfeatures=1500)
+detector = cv2.ORB_create(nfeatures=1500//4)
 # descriptor = DescriptorExtractor_create("RootSIFT")
-descriptor = cv2.ORB_create(nfeatures=1500)
+descriptor = cv2.ORB_create(nfeatures=1500//4)
 
 dad = DetectAndDescribe(detector, descriptor)
 distanceMetric = chi2_distance
